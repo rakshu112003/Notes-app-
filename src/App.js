@@ -1,40 +1,85 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 
-export default function App() {
+function App() {
   const [notes, setNotes] = useState(() => {
-      return JSON.parse(localStorage.getItem("notes")) || [];
-        });
-          const [text, setText] = useState("");
-            const inputRef = useRef(null);
+    const saved = localStorage.getItem("notes");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [input, setInput] = useState("");
+  const inputRef = useRef();
 
-              useEffect(() => {
-                  localStorage.setItem("notes", JSON.stringify(notes));
-                    }, [notes]);
+  // Save notes in localStorage
+  useEffect(() => {
+    localStorage.setItem("notes", JSON.stringify(notes));
+  }, [notes]);
 
-                      useEffect(() => {
-                          inputRef.current.focus();
-                            }, []);
+  const addNote = () => {
+    if (input.trim() === "") return;
+    setNotes([...notes, { id: Date.now(), text: input }]);
+    setInput("");
+    inputRef.current.focus();
+  };
 
-                              const addNote = () => {
-                                  if (text.trim() === "") return;
-                                      setNotes([...notes, { id: Date.now(), text }]);
-                                          setText("");
-                                              inputRef.current.focus();
-                                                };
+  const deleteNote = (id) => {
+    setNotes(notes.filter((note) => note.id !== id));
+  };
 
-                                                  const deleteNote = (id) => {
-                                                      setNotes(notes.filter((n) => n.id !== id));
-                                                        };
+  return (
+    <div style={styles.container}>
+      <h1 style={styles.heading}>Notes App</h1>
 
-                                                          return (
-                                                              <div style={styles.container}>
-                                                                    <h2>Notes App</h2>
+      <div style={styles.inputBox}>
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type your note..."
+          style={styles.input}
+        />
+        <button onClick={addNote} style={styles.button}>
+          Add
+        </button>
+      </div>
 
-                                                                          <div style={styles.inputArea}>
-                                                                                  <input
-                                                                                            ref={inputRef}
-                                                                                                      value={text}
-                                                                                                                onChange={(e) => setText(e.target.value)}
+      <div style={styles.notesList}>
+        {notes.map((note) => (
+          <div key={note.id} style={styles.noteCard}>
+            <p>{note.text}</p>
+            <button onClick={() => deleteNote(note.id)} style={styles.deleteBtn}>
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  container: { padding: 20, fontFamily: "Arial" },
+  heading: { textAlign: "center" },
+  inputBox: { display: "flex", gap: 10, marginBottom: 20 },
+  input: { flex: 1, padding: 10, fontSize: 16 },
+  button: { padding: "10px 20px", fontSize: 16 },
+  notesList: { display: "flex", flexDirection: "column", gap: 10 },
+  noteCard: {
+    padding: 10,
+    background: "#f1f1f1",
+    borderRadius: 5,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  deleteBtn: {
+    background: "red",
+    color: "#fff",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: 4
+  }
+};
+
+export default App;                                                                                                                onChange={(e) => setText(e.target.value)}
                                                                                                                           placeholder="Write a note..."
                                                                                                                                     style={styles.input}
                                                                                                                                             />
